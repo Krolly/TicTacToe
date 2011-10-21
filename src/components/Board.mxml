@@ -147,7 +147,7 @@
             var column:int = (event.currentTarget as Board).contentMouseX / 100;
             var row:int = (event.currentTarget as Board).contentMouseY / 100;
 
-            if (this.turns <= 9 && !gameClosed) this.turns++;
+            if (this.turns <= 9 && !gameClosed && (itemsCollection[row][column] as BoardItemClass).changeble) this.turns++;
 
 
             if (isFirstPlayer) {
