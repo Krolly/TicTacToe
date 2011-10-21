@@ -1,204 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
-		 xmlns:s="library://ns.adobe.com/flex/spark"
-		 xmlns:mx="library://ns.adobe.com/flex/mx"
-		 xmlns:components="components.*"
-		 width="300" height="300" click="group1_clickHandler(event)"
-		 creationComplete="group1_creationCompleteHandler(event)" horizontalCenter="0"
-		 verticalCenter="0">
-	<fx:Declarations>
-		<!-- Place non-visual elements (e.g., services, value objects) here -->
-	</fx:Declarations>
-	
-	<fx:Script>
-		<![CDATA[
-			import classes.BoardItemClass;
-			
-			import mx.collections.ArrayCollection;
-			import mx.controls.Alert;
-			import mx.events.CloseEvent;
-			import mx.events.FlexEvent;
-			
-			private var itemsCollection:Array = new Array();
-			[Bindable]
-			public var winner:String;
-			public var gameClosed:Boolean = false;
-			
-			
-			public var turns:int = 0;
-			
-			private var isFirstPlayer:Boolean = true;
-			
-			public static const PLAYER_ONE_COLOR:uint = 0xFF0000;
+         xmlns:s="library://ns.adobe.com/flex/spark"
+         xmlns:components="components.*"
+         width="300" height="300" click="group1_clickHandler(event)"
+         creationComplete="group1_creationCompleteHandler(event)" horizontalCenter="0"
+         verticalCenter="0">
+    <fx:Declarations>
+        <!-- Place non-visual elements (e.g., services, value objects) here -->
+    </fx:Declarations>
 
-			public static const PLAYER_TWO_COLOR:uint = 0x000000;
-			
-			public static const DEFAULT_COLOR:uint = 0xCCCCCC;
-			
-			public function newGame():void
-			{
-				for(var i:int = 0; i<3; i++)
-				{
-					for (var j:int = 0; j<3; j++)
-					{
-						(itemsCollection[i][j] as BoardItemClass).item.changeColor(Board.DEFAULT_COLOR);
-						(itemsCollection[i][j] as BoardItemClass).changeble = true;
-						(itemsCollection[i][j] as BoardItemClass).player = 0;
-						winner = "";
-						turns = 0;
-						this.isFirstPlayer = true;
-						this.gameClosed = false;
-					}
-				}
-			}
-			
-			
-			
-			private function closeGame():void
-			{
-				for(var i:int = 0; i<3; i++)
-				{
-					for(var j:int = 0; j<3; j++)
-					{
-						(itemsCollection[i][j] as BoardItemClass).changeble = false;
-					}
-				} 
-				
-				gameClosed = true;
-			}
-			
-			private function returnWinner(tmpValues:ArrayCollection):String
-			{
-				
-				var result:String = "";
-				
-				if (tmpValues[0]==tmpValues[1] && tmpValues[1]==tmpValues[2])
-				{
-					if (tmpValues[0]==1) 
-					{
-						result = "Player 1 wins";
-						Alert.show(SharedObject.getLocal("gameStat").data.firstPlayer);
-						closeGame();
-					}
- 					if (tmpValues[0]==2) 
-					{
-						result = "Player 2 wins";
-						Alert.show(SharedObject.getLocal("gameStat").data.secondPlayer);
-						closeGame();
-					} 
-					
-				}
-				
-				if (this.turns == 9)
-				{
-					result = "Nobody wins!";
-					closeGame();
-				}
-				return result;
-			}
-			
-			private function checkWinner():void
-			{
-				
-				//смотрим по строкам
-				for (var i:int = 0; i<3; i++)
-				{
-					var horisontalValues:ArrayCollection = new ArrayCollection();
-					var verticalValues:ArrayCollection = new ArrayCollection();
-					
-					for (var j:int = 0; j<3;j++)
-					{
-						horisontalValues.addItem((itemsCollection[i][j] as BoardItemClass).player);
-						verticalValues.addItem((itemsCollection[j][i] as BoardItemClass).player);
-					}
-					
-					
-					if (returnWinner(horisontalValues)!="") winner = returnWinner(horisontalValues);
-					if (returnWinner(verticalValues)!="") winner = returnWinner(verticalValues);
-						
-					horisontalValues.removeAll();
-					verticalValues.removeAll();
-				}
-				
-				
-				
-				//смотрим по диагонали
-				var leftDiagonalValues:ArrayCollection = new ArrayCollection();
-				var rightDiagonalValues:ArrayCollection = new ArrayCollection();
-				
-				for (var k:int = 0; k<3;k++)
-				{
-					leftDiagonalValues.addItem((itemsCollection[k][k] as BoardItemClass).player);
-					rightDiagonalValues.addItem((itemsCollection[k][2-k] as BoardItemClass).player);
-				}
- 				
-				
-				if (returnWinner(leftDiagonalValues)!="") winner = returnWinner(leftDiagonalValues);
-				if (returnWinner(rightDiagonalValues)!="") winner = returnWinner(rightDiagonalValues);
-				
-				leftDiagonalValues.removeAll();
-				rightDiagonalValues.removeAll(); 
-				
-			}
-			
-			protected function group1_creationCompleteHandler(event:FlexEvent):void
-			{
-				itemsCollection[0] = [it00, it01, it02];
-				itemsCollection[1] = [it10, it11, it12];
-				itemsCollection[2] = [it20, it21, it22];
-				
-				itemsCollection[0] = [new BoardItemClass(it00), new BoardItemClass(it01), new BoardItemClass(it02)];
-				itemsCollection[1] = [new BoardItemClass(it10), new BoardItemClass(it11), new BoardItemClass(it12)];
-				itemsCollection[2] = [new BoardItemClass(it20), new BoardItemClass(it21), new BoardItemClass(it22)];
-			}
-			
-			protected function group1_clickHandler(event:MouseEvent):void
-			{
-				// TODO Auto-generated method stub
-				var column:int = (event.currentTarget as Board).contentMouseX /100;
-				var row:int = (event.currentTarget as Board).contentMouseY /100;
-				
-				if (this.turns <= 9 && !gameClosed) this.turns++;
-				
-				
-				if (isFirstPlayer)
-				{
-					var tmpItem:BoardItemClass = itemsCollection[row][column] as BoardItemClass;
-					if (tmpItem.changeble) 
-					{
-						tmpItem.item.changeColor(Board.PLAYER_ONE_COLOR);
-						tmpItem.changeble = false;
-						tmpItem.player = 1;
-					}
-					
-					this.isFirstPlayer = !isFirstPlayer;
-				}
-				
-				else
-				{
-					var tmpItem:BoardItemClass = itemsCollection[row][column] as BoardItemClass;
-					if (tmpItem.changeble) 
-					{
-						tmpItem.item.changeColor(Board.PLAYER_TWO_COLOR);
-						tmpItem.changeble = false;
-						tmpItem.player = 2;
-					}
-					
-					this.isFirstPlayer = !isFirstPlayer;
-				}
-				checkWinner();
-			}
-			
-		]]>
+    <fx:Script>
+		<![CDATA[
+        import classes.BoardItemClass;
+
+        import mx.collections.ArrayCollection;
+        import mx.controls.Alert;
+        import mx.events.CloseEvent;
+        import mx.events.FlexEvent;
+
+        private var itemsCollection:Array = new Array();
+        [Bindable]
+        public var winner:String;
+        public var gameClosed:Boolean = false;
+
+
+        public var turns:int = 0;
+
+        private var isFirstPlayer:Boolean = true;
+
+        public static const PLAYER_ONE_COLOR:uint = 0xFF0000;
+
+        public static const PLAYER_TWO_COLOR:uint = 0x000000;
+
+        public static const DEFAULT_COLOR:uint = 0xCCCCCC;
+
+
+        public function newGame():void {
+            for (var i:int = 0; i < 3; i++) {
+                for (var j:int = 0; j < 3; j++) {
+                    (itemsCollection[i][j] as BoardItemClass).item.changeColor(Board.DEFAULT_COLOR);
+                    (itemsCollection[i][j] as BoardItemClass).changeble = true;
+                    (itemsCollection[i][j] as BoardItemClass).player = 0;
+                    winner = "";
+                    turns = 0;
+                    this.isFirstPlayer = true;
+                    this.gameClosed = false;
+                }
+            }
+        }
+
+
+        /**
+         * all board items will be closed
+         */
+        private function closeGame():void {
+            for (var i:int = 0; i < 3; i++) {
+                for (var j:int = 0; j < 3; j++) {
+                    (itemsCollection[i][j] as BoardItemClass).changeble = false;
+                }
+            }
+
+            gameClosed = true;
+        }
+
+        /**
+         *
+         * @param tmpValues collection of board items
+         * @return winner's name
+         */
+        private function returnWinner(tmpValues:ArrayCollection):String {
+
+            var result:String = "";
+
+            if (tmpValues[0] == tmpValues[1] && tmpValues[1] == tmpValues[2]) {
+                if (tmpValues[0] == 1) {
+                    result = "Player 1 wins";
+                    Alert.show(SharedObject.getLocal("gameStat").data.firstPlayer);
+                    closeGame();
+                }
+                if (tmpValues[0] == 2) {
+                    result = "Player 2 wins";
+                    Alert.show(SharedObject.getLocal("gameStat").data.secondPlayer);
+                    closeGame();
+                }
+
+            }
+
+            if (this.turns == 9) {
+                result = "Nobody wins!";
+                closeGame();
+            }
+            return result;
+        }
+        private function checkWinner():void {
+
+            //смотрим по строкам
+            for (var i:int = 0; i < 3; i++) {
+                var horisontalValues:ArrayCollection = new ArrayCollection();
+                var verticalValues:ArrayCollection = new ArrayCollection();
+
+                for (var j:int = 0; j < 3; j++) {
+                    horisontalValues.addItem((itemsCollection[i][j] as BoardItemClass).player);
+                    verticalValues.addItem((itemsCollection[j][i] as BoardItemClass).player);
+                }
+
+
+                if (returnWinner(horisontalValues) != "") winner = returnWinner(horisontalValues);
+                if (returnWinner(verticalValues) != "") winner = returnWinner(verticalValues);
+
+                horisontalValues.removeAll();
+                verticalValues.removeAll();
+            }
+
+
+            //смотрим по диагонали
+            var leftDiagonalValues:ArrayCollection = new ArrayCollection();
+            var rightDiagonalValues:ArrayCollection = new ArrayCollection();
+
+            for (var k:int = 0; k < 3; k++) {
+                leftDiagonalValues.addItem((itemsCollection[k][k] as BoardItemClass).player);
+                rightDiagonalValues.addItem((itemsCollection[k][2 - k] as BoardItemClass).player);
+            }
+
+
+            if (returnWinner(leftDiagonalValues) != "") winner = returnWinner(leftDiagonalValues);
+            if (returnWinner(rightDiagonalValues) != "") winner = returnWinner(rightDiagonalValues);
+
+
+            leftDiagonalValues.removeAll();
+            rightDiagonalValues.removeAll();
+
+        }
+
+        protected function group1_creationCompleteHandler(event:FlexEvent):void {
+            itemsCollection[0] = [it00, it01, it02];
+            itemsCollection[1] = [it10, it11, it12];
+            itemsCollection[2] = [it20, it21, it22];
+
+            itemsCollection[0] = [new BoardItemClass(it00), new BoardItemClass(it01), new BoardItemClass(it02)];
+            itemsCollection[1] = [new BoardItemClass(it10), new BoardItemClass(it11), new BoardItemClass(it12)];
+            itemsCollection[2] = [new BoardItemClass(it20), new BoardItemClass(it21), new BoardItemClass(it22)];
+        }
+
+        protected function group1_clickHandler(event:MouseEvent):void {
+            // TODO Auto-generated method stub
+            var column:int = (event.currentTarget as Board).contentMouseX / 100;
+            var row:int = (event.currentTarget as Board).contentMouseY / 100;
+
+            if (this.turns <= 9 && !gameClosed) this.turns++;
+
+
+            if (isFirstPlayer) {
+                var tmpItem:BoardItemClass = itemsCollection[row][column] as BoardItemClass;
+                if (tmpItem.changeble) {
+                    tmpItem.item.changeColor(Board.PLAYER_ONE_COLOR);
+                    tmpItem.changeble = false;
+                    tmpItem.player = 1;
+                }
+
+                this.isFirstPlayer = !isFirstPlayer;
+            }
+
+            else {
+                var tmpItem:BoardItemClass = itemsCollection[row][column] as BoardItemClass;
+                if (tmpItem.changeble) {
+                    tmpItem.item.changeColor(Board.PLAYER_TWO_COLOR);
+                    tmpItem.changeble = false;
+                    tmpItem.player = 2;
+                }
+
+                this.isFirstPlayer = !isFirstPlayer;
+            }
+            checkWinner();
+        }
+        ]]>
 	</fx:Script>
-	
-	<components:BoardItem id="it00"/>
-	<components:BoardItem id="it01" x="100"/>
-	<components:BoardItem id="it02" x="200"/>
-	<components:BoardItem id="it10" x="0" y="100"/>
-	<components:BoardItem id="it11" x="100" y="100"/>
-	<components:BoardItem id="it12" x="200" y="100"/>
-	<components:BoardItem id="it20" x="0" y="200"/>
-	<components:BoardItem id="it21" x="100" y="200"/>
-	<components:BoardItem id="it22" x="200" y="200"/>
+
+    <components:BoardItem id="it00"/>
+    <components:BoardItem id="it01" x="100"/>
+    <components:BoardItem id="it02" x="200"/>
+    <components:BoardItem id="it10" x="0" y="100"/>
+    <components:BoardItem id="it11" x="100" y="100"/>
+    <components:BoardItem id="it12" x="200" y="100"/>
+    <components:BoardItem id="it20" x="0" y="200"/>
+    <components:BoardItem id="it21" x="100" y="200"/>
+    <components:BoardItem id="it22" x="200" y="200"/>
 </s:Group>
