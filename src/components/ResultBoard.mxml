@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="338" height="146" creationComplete="group1_creationCompleteHandler(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			[Bindable]
+			public var so:SharedObject = null;
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				labelPlayer1.text = this.so.data.firstPlayer;
+				labelPlayer2.text = this.so.data.secondPlayer;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<s:Label x="10" y="10" id="labelPlayer1" width="268" height="49" fontSize="50" fontWeight="bold" text="Player 1: "/>
+	<s:Label x="10" y="87" id="labelPlayer2" width="268" height="49" fontSize="50" fontWeight="bold" text="Player 2: "/>
+</s:Group>
